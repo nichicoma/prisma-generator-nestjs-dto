@@ -43,6 +43,9 @@ export const computeCreateDtoParams = ({
   templateHelpers,
 }: ComputeCreateDtoParamsParam): CreateDtoParams => {
   let hasEnum = false;
+  let hasTransformer = false;
+  let hasValidator = false;
+  // let hasValidator = false;
   const imports: ImportStatementParams[] = [];
   const apiExtraModels: string[] = [];
   const extraClasses: string[] = [];
@@ -104,6 +107,8 @@ export const computeCreateDtoParams = ({
     }
 
     if (field.kind === 'enum') hasEnum = true;
+    if (field.type !== 'String') hasTransformer = true;
+    if (field.isRequired) hasValidator = true;
 
     return [...result, mapDMMFToParsedField(field, overrides)];
   }, [] as ParsedField[]);
@@ -113,6 +118,16 @@ export const computeCreateDtoParams = ({
     if (apiExtraModels.length) destruct.push('ApiExtraModels');
     if (hasEnum) destruct.push('ApiProperty');
     imports.unshift({ from: '@nestjs/swagger', destruct });
+  }
+
+  if (hasTransformer) {
+    const destruct = ['Type'];
+    imports.unshift({ from: 'class-transformer', destruct });
+  }
+
+  if (hasValidator) {
+    const destruct = ['IsNotEmpty'];
+    imports.unshift({ from: 'class-validator', destruct });
   }
 
   const importPrismaClient = makeImportsFromPrismaClient(fields);

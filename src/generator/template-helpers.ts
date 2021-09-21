@@ -77,13 +77,7 @@ export const importStatement = (input: ImportStatementParams) => {
 };
 
 export const importStatements = (items: ImportStatementParams[]) =>
-  `${each([...items, {
-    from: 'class-transformer',
-    destruct: ['Type']
-  }, {
-    from: 'class-validator',
-    destruct: ['IsNotEmpty']
-  }], importStatement, '\n')}`;
+  `${each(items, importStatement, '\n')}`;
 
 interface MakeHelpersParam {
   connectDtoPrefix: string;
@@ -153,22 +147,18 @@ export const makeHelpers = ({
     useInputTypes = false,
     forceOptional = false,
   ) =>
-    `${when(
-      field.isRequired,
-      `@IsNotEmpty()\n`,
-    )}${when(
+    `${when(field.isRequired, `@IsNotEmpty()\n`)}${when(
       field.kind === 'enum',
       `@ApiProperty({ enum: ${fieldType(field, useInputTypes)}})\n`,
-    )}${when(
-      field.type === 'number',
-      `@Type(() => Number)\n`,
-    )}${when(
-      field.type === 'Date',
+    )}${when(field.type === 'Int', `@Type(() => Number)\n`)}${when(
+      field.type === 'DateTime',
       `@Type(() => Date)\n`,
-    )}${field.name}${unless(
-      field.isRequired && !forceOptional,
-      '?',
-    )}: ${fieldType(field, useInputTypes)};`;
+    )}${when(field.type === 'Boolean', `@Type(() => Boolean)\n`)}${
+      field.name
+    }${unless(field.isRequired && !forceOptional, '?')}: ${fieldType(
+      field,
+      useInputTypes,
+    )};`;
 
   const fieldsToDtoProps = (
     fields: ParsedField[],

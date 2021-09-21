@@ -42,6 +42,8 @@ export const computeUpdateDtoParams = ({
   templateHelpers,
 }: ComputeUpdateDtoParamsParam): UpdateDtoParams => {
   let hasEnum = false;
+  let hasTransformer = false;
+  // let hasValidator = false;
   const imports: ImportStatementParams[] = [];
   const extraClasses: string[] = [];
   const apiExtraModels: string[] = [];
@@ -49,6 +51,7 @@ export const computeUpdateDtoParams = ({
   const relationScalarFields = getRelationScalars(model.fields);
   const relationScalarFieldNames = Object.keys(relationScalarFields);
 
+  console.log(model.dbName, model.fields.map((field) => field.type).join(', '));
   const fields = model.fields.reduce((result, field) => {
     const { name } = field;
     const overrides: Partial<DMMF.Field> = { isRequired: false };
@@ -89,6 +92,8 @@ export const computeUpdateDtoParams = ({
     }
 
     if (field.kind === 'enum') hasEnum = true;
+    if (field.type !== 'String') hasTransformer = true;
+    // if (field.isRequired) hasValidator = true;
 
     return [...result, mapDMMFToParsedField(field, overrides)];
   }, [] as ParsedField[]);
@@ -99,6 +104,16 @@ export const computeUpdateDtoParams = ({
     if (hasEnum) destruct.push('ApiProperty');
     imports.unshift({ from: '@nestjs/swagger', destruct });
   }
+
+  if (hasTransformer) {
+    const destruct = ['Type'];
+    imports.unshift({ from: 'class-transformer', destruct });
+  }
+
+  // if (hasValidator) {
+  //   const destruct = ['IsNotEmpty'];
+  //   imports.unshift({ from: 'class-validator', destruct });
+  // }
 
   const importPrismaClient = makeImportsFromPrismaClient(fields);
   if (importPrismaClient) imports.unshift(importPrismaClient);

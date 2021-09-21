@@ -11,6 +11,7 @@ interface ComputeModelParamsParam {
   allModels: Model[];
   templateHelpers: TemplateHelpers;
 }
+
 export const computeModelParams = ({
   model,
   allModels,
@@ -23,7 +24,6 @@ export const computeModelParams = ({
     allModels, // ? should this be `allModels: models` instead
     templateHelpers,
   }),
-
   update: computeUpdateDtoParams({
     model,
     allModels,
