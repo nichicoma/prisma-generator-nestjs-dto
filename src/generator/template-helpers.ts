@@ -77,7 +77,13 @@ export const importStatement = (input: ImportStatementParams) => {
 };
 
 export const importStatements = (items: ImportStatementParams[]) =>
-  `${each(items, importStatement, '\n')}`;
+  `${each([...items, {
+    from: 'class-transformer',
+    destruct: ['Type']
+  }, {
+    from: 'class-validator',
+    destruct: ['IsNotEmpty']
+  }], importStatement, '\n')}`;
 
 interface MakeHelpersParam {
   connectDtoPrefix: string;
@@ -148,8 +154,17 @@ export const makeHelpers = ({
     forceOptional = false,
   ) =>
     `${when(
+      field.isRequired,
+      `@IsNotEmpty()\n`,
+    )}${when(
       field.kind === 'enum',
       `@ApiProperty({ enum: ${fieldType(field, useInputTypes)}})\n`,
+    )}${when(
+      field.type === 'number',
+      `@Type(() => Number)\n`,
+    )}${when(
+      field.type === 'Date',
+      `@Type(() => Date)\n`,
     )}${field.name}${unless(
       field.isRequired && !forceOptional,
       '?',
