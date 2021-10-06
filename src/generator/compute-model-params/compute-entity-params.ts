@@ -110,8 +110,13 @@ export const computeEntityParams = ({
     return [...result, mapDMMFToParsedField(field, overrides)];
   }, [] as ParsedField[]);
 
-  if (apiExtraModels.length)
-    imports.unshift({ from: '@nestjs/swagger', destruct: ['ApiExtraModels'] });
+  const hasEnum = model.fields.some((field) => field.kind === 'enum');
+  if (apiExtraModels.length || hasEnum) {
+    const destruct = [];
+    if (apiExtraModels.length) destruct.push('ApiExtraModels');
+    if (hasEnum) destruct.push('ApiProperty');
+    imports.unshift({ from: '@nestjs/swagger', destruct });
+  }
 
   const importPrismaClient = makeImportsFromPrismaClient(fields);
   if (importPrismaClient) imports.unshift(importPrismaClient);

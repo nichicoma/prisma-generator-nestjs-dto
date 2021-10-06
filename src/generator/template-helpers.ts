@@ -146,33 +146,41 @@ export const makeHelpers = ({
     field: ParsedField,
     useInputTypes = false,
     forceOptional = false,
+    disableDecorator = false,
   ) =>
-    `${when(field.isRequired, `@IsNotEmpty()\n`)}${when(
-      field.kind === 'enum',
-      `@ApiProperty({ enum: ${fieldType(field, useInputTypes)}})\n`,
-    )}${when(field.type === 'Int', `@Type(() => Number)\n`)}${when(
-      field.type === 'DateTime',
-      `@Type(() => Date)\n`,
-    )}${when(field.type === 'Boolean', `@Type(() => Boolean)\n`)}${
-      field.name
-    }${unless(field.isRequired && !forceOptional, '?')}: ${fieldType(
-      field,
-      useInputTypes,
-    )};`;
+    disableDecorator
+      ? `  ${field.name}: ${fieldType(field, useInputTypes)}`
+      : `${when(field.isRequired, `@IsNotEmpty()\n`)}${when(
+          field.kind === 'enum',
+          `@ApiProperty({ enum: ${fieldType(field, useInputTypes)}})\n`,
+        )}${when(field.type === 'Int', `@Type(() => Number)\n`)}${when(
+          field.type === 'DateTime',
+          `@Type(() => Date)\n`,
+        )}${when(field.type === 'Boolean', `@Type(() => Boolean)\n`)}${
+          field.name
+        }${unless(field.isRequired && !forceOptional, '?')}: ${fieldType(
+          field,
+          useInputTypes,
+        )};`;
 
   const fieldsToDtoProps = (
     fields: ParsedField[],
     useInputTypes = false,
     forceOptional = false,
+    disableDecorator = false,
   ) =>
     `${each(
       fields,
-      (field) => fieldToDtoProp(field, useInputTypes, forceOptional),
+      (field) =>
+        fieldToDtoProp(field, useInputTypes, forceOptional, disableDecorator),
       '\n',
     )}`;
 
   const fieldToEntityProp = (field: ParsedField) =>
-    `${field.name}${unless(field.isRequired, '?')}: ${fieldType(field)} ${when(
+    `${when(
+      field.kind === 'enum',
+      `@ApiProperty({ enum: ${fieldType(field)}})\n`,
+    )}${field.name}${unless(field.isRequired, '?')}: ${fieldType(field)} ${when(
       field.isNullable,
       ' | null',
     )};`;
