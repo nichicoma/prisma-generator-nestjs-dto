@@ -152,7 +152,13 @@ export const makeHelpers = ({
       ? `  ${field.name}: ${fieldType(field, useInputTypes)}`
       : `${when(field.isRequired, `@IsNotEmpty()\n`)}${when(
           field.kind === 'enum',
-          `@ApiProperty({ enum: ${fieldType(field, useInputTypes)}})\n`,
+          `@ApiProperty({ enum: ${fieldType(
+            field,
+            useInputTypes,
+          )}})\n@Transform(({ value }) => stringToEnumNumber(${fieldType(
+            field,
+            useInputTypes,
+          )}, value))\n`,
         )}${when(field.type === 'Int', `@Type(() => Number)\n`)}${when(
           field.type === 'DateTime',
           `@Type(() => Date)\n`,

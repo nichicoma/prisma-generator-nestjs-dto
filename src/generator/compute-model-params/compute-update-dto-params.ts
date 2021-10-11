@@ -105,6 +105,13 @@ export const computeUpdateDtoParams = ({
     imports.unshift({ from: '@nestjs/swagger', destruct });
   }
 
+  if (hasEnum) {
+    imports.unshift({
+      from: 'src/common/enum',
+      destruct: ['stringToEnumNumber'],
+    });
+  }
+
   if (hasTransformer) {
     const destruct = ['Type'];
     imports.unshift({ from: 'class-transformer', destruct });

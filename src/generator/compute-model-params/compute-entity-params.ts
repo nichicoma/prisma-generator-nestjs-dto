@@ -118,6 +118,13 @@ export const computeEntityParams = ({
     imports.unshift({ from: '@nestjs/swagger', destruct });
   }
 
+  if (hasEnum) {
+    imports.unshift({
+      from: 'src/common/enum',
+      destruct: ['stringToEnumNumber'],
+    });
+  }
+
   const importPrismaClient = makeImportsFromPrismaClient(fields);
   if (importPrismaClient) imports.unshift(importPrismaClient);
 
