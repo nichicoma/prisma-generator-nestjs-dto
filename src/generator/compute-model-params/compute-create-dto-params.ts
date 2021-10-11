@@ -107,7 +107,7 @@ export const computeCreateDtoParams = ({
     }
 
     if (field.kind === 'enum') hasEnum = true;
-    if (field.type !== 'String') hasTransformer = true;
+    if (field.type !== 'String' && field.kind !== 'enum') hasTransformer = true;
     if (field.isRequired) hasValidator = true;
 
     return [...result, mapDMMFToParsedField(field, overrides)];
@@ -127,8 +127,10 @@ export const computeCreateDtoParams = ({
     });
   }
 
-  if (hasTransformer) {
-    const destruct = ['Type'];
+  if (hasTransformer || hasEnum) {
+    const destruct = [];
+    if (hasTransformer) destruct.push('Type');
+    if (hasEnum) destruct.push('Transform');
     imports.unshift({ from: 'class-transformer', destruct });
   }
 
